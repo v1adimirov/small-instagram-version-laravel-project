@@ -1,0 +1,36 @@
+version: '3'
+
+networks:
+  laravel:
+    driver: bridge
+
+services:
+  nginx:
+    image: nginx:alpine
+    container_name: nginx
+    restart: unless-stopped
+    tty: true
+    ports:
+      - "8001:8001"
+    volumes:
+      - ./src:/var/www/app
+      - ./nginx/conf.d:/etc/nginx/conf.d
+    depends_on:
+      - php
+    networks:
+      - laravel
+
+  php:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: php
+    restart: unless-stopped
+    tty: true
+    working_dir: /var/www/app
+    volumes:
+      - ./src:/var/www/app
+    ports:
+      - "${PHP_HOST_PORT}:${PHP_DOCKER_CONTAINER_PORT}"
+    networks:
+      - laravel
